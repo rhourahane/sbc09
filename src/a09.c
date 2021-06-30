@@ -53,7 +53,7 @@
 #define NLABELS 2048
 #define MAXIDLEN 16
 #define MAXLISTBYTES 7
-#define FNLEN 30
+#define FNLEN 256
 #define LINELEN 128
 
 
