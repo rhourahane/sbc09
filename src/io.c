@@ -29,10 +29,19 @@
 #include<stdlib.h>
 #include<ctype.h>
 #include<signal.h>
+
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <time.h>
+#include <conio.h>
+#else
 #include<sys/time.h>
 
 #include <unistd.h>
 #include <fcntl.h>
+#endif // defined(_WIN32)
+
 #include <string.h>
 
 #ifdef USE_TERMIOS
@@ -43,7 +52,21 @@
 #include "v09.h"
 
 int tflags;
+#if defined(_WIN32)
+HANDLE hConsole;
+HANDLE hTimer;
+DWORD oldConsoleMode;
+
+BOOL __stdcall ctrlHandler(DWORD dwCtrlType)
+{
+	escape = 1;
+	attention = 1;
+
+	return TRUE;
+}
+#else
 struct termios termsetting;
+#endif
 
 int xmstat; /* 0= no XMODEM transfer, 1=send, 2=receiver */
 unsigned char xmbuf[132];
@@ -69,8 +92,46 @@ int char_input(void) {
 			if (c == '\n')
 				c = '\r';
 			return c;
-		} else
+		}
+		else
+#if defined(_WIN32)
+		{
+			INPUT_RECORD inBuf[1];
+			DWORD numRead;
+			if (!PeekConsoleInput(hConsole, inBuf, 1, &numRead))
+			{
+				auto errorCode = GetLastError();
+				do_exit();
+			}
+			else
+			{
+				if (numRead > 0)
+				{
+					if (!ReadConsoleInput(hConsole, inBuf, 1, &numRead))
+					{
+						auto errorCode = GetLastError();
+						do_exit();
+					}
+
+					if ((numRead > 0) &&
+						(inBuf[0].EventType == KEY_EVENT) &&
+						(inBuf[0].Event.KeyEvent.bKeyDown))
+					{
+						int inputChar = inBuf[0].Event.KeyEvent.uChar.AsciiChar;
+						if (escchar == inputChar)
+						{
+							ctrlHandler(CTRL_C_EVENT);
+						}
+						return inputChar;
+					}
+				}
+			}
+
+			return EOF;
+		}
+#else
 			return getchar();
+#endif // _WIN32
 	} else if (xmstat == 1) {
 		if (xidx) {
 			c = xmbuf[xidx++];
@@ -200,11 +261,27 @@ void do_output(int a, int c) {
 	}
 }
 
+#if defined(WIN32)
+void restore_term(void) {
+	if (hConsole != 0 &&
+		hConsole != INVALID_HANDLE_VALUE)
+	{
+		SetConsoleMode(hConsole, oldConsoleMode);
+	}
+	SetConsoleCtrlHandler(NULL, FALSE);
+	if (hTimer != 0)
+	{
+		DeleteTimerQueueTimer(NULL, hTimer, NULL);
+		hTimer = 0;
+	}
+}
+#else
 void restore_term(void) {
 	tcsetattr(0, TCSAFLUSH, &termsetting);
 	fcntl(0, F_SETFL, tflags);
 	signal(SIGALRM, SIG_IGN);
 }
+#endif
 
 void do_exit(void) {
 	restore_term();
@@ -284,6 +361,30 @@ void do_escape(void) {
 	set_term(escchar);
 }
 
+#if defined(WIN32)
+void CALLBACK timeHandler(void* lpParam, BOOLEAN timerOrWaitFired)
+{
+	attention = 1;
+	irq = 2;
+}
+
+void set_term(char c)
+{
+	hConsole = GetStdHandle(STD_INPUT_HANDLE);
+	if (hConsole == INVALID_HANDLE_VALUE)
+	{
+		do_exit();
+	}
+	if (!GetConsoleMode(hConsole, &oldConsoleMode))
+	{
+		do_exit();
+	};
+
+	SetConsoleCtrlHandler(ctrlHandler, TRUE);
+	hTimer = 0;
+	CreateTimerQueueTimer(&hTimer, NULL, timeHandler, NULL, 20, 20, WT_EXECUTEINTIMERTHREAD);
+}
+#else
 void timehandler(int sig) {
 	attention = 1;
 	irq = 2;
@@ -318,3 +419,4 @@ void set_term(char c) {
 	timercontrol.it_value.tv_usec = 20000;
 	setitimer(ITIMER_REAL, &timercontrol, NULL);
 }
+#endif
