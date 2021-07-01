@@ -53,7 +53,7 @@
 #define NLABELS 2048
 #define MAXIDLEN 16
 #define MAXLISTBYTES 7
-#define FNLEN 256
+#define FNLEN _MAX_PATH
 #define LINELEN 128
 
 
@@ -648,7 +648,7 @@ void scanindexed()
 
 void scanoperands()
 {
- char c,d,*oldsrcptr;
+ char c,*oldsrcptr;
  unknown=0;
  opsize=0;
  certain=1;
@@ -843,12 +843,12 @@ void doaddress() /* assemble the right addressing bytes for an instruction */
 {
  int offs;
  switch(mode) {
- case 0: if(opsize==2)putbyte(operand);else putword(operand);break;
- case 1: putbyte(operand);break;
+ case 0: if(opsize==2)putbyte((unsigned char)operand);else putword(operand);break;
+ case 1: putbyte((unsigned char)operand);break;
  case 2: putword(operand);break;
  case 3: case 5: putbyte(postbyte);
     switch(opsize) {
-     case 2: putbyte(operand);break;
+     case 2: putbyte((unsigned char)operand);break;
      case 3: putword(operand);
     }
     break;
@@ -880,8 +880,8 @@ void oneimm(int co)
 {
  scanoperands();
  if(mode>=3)error|=2;
- putbyte(co);
- putbyte(operand);
+ putbyte((unsigned char)co);
+ putbyte((unsigned char)operand);
 }
 
 void lea(int co)
@@ -1048,7 +1048,7 @@ void pseudoop(int co,struct symrecord * lp)
           putbyte(*srcptr++);
          if(*srcptr=='\"')srcptr++;
         } else {
-          putbyte(scanexpr(0));
+          putbyte((unsigned char)scanexpr(0));
           if(unknown&&pass==2)error|=4;
         }
         skipspace();
@@ -1199,7 +1199,7 @@ void suppressline()
  if(op && op->cat==13) {
   if(op->code==10) ifcount++;
   else if(op->code==3) {
-   if(ifcount>0)ifcount--;else if(suppress==1|suppress==2)suppress=0;
+   if(ifcount>0)ifcount--;else if(suppress==1||suppress==2)suppress=0;
   } else if(op->code==1) {
    if(ifcount==0 && suppress==2)suppress=0;
   }

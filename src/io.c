@@ -80,7 +80,8 @@ FILE *infile;
 FILE *xfile;
 
 int char_input(void) {
-	int c, w, sum;
+	int c, sum;
+	size_t w;
 	if (!xmstat) {
 		if (infile) {
 			c = getc(infile);
@@ -208,6 +209,8 @@ int do_input(int a) {
 		}
 		return c;
 	}
+
+	return EOF;
 }
 
 void do_output(int a, int c) {
@@ -373,10 +376,12 @@ void set_term(char c)
 	hConsole = GetStdHandle(STD_INPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE)
 	{
+		perror("Failed to get windows console");
 		do_exit();
 	}
 	if (!GetConsoleMode(hConsole, &oldConsoleMode))
 	{
+		perror("Failed to get mode of windows console");
 		do_exit();
 	};
 

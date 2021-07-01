@@ -50,23 +50,38 @@ void do_trace(void)
                    xreg,yreg,ureg,sreg,*areg,*breg,ccreg);
 } 
  
-void read_image()
+void read_image(const char *imagePath, int romAddr, int romSize)
 {
- FILE *image;
- if((image=fopen("v09.rom","rb"))==NULL) 
-  if((image=fopen("../v09.rom","rb"))==NULL) 
-   if((image=fopen("..\\v09.rom","rb"))==NULL) {
-    perror("v09, image file");
-    exit(2);
- }
- fread(mem+0x8000,0x8000,1,image);
- fclose(image);
+    FILE *image;
+    if ((image = fopen(imagePath, "rb")) == NULL)
+    {
+        char allPath[_MAX_PATH];
+        if (strlen(imagePath) < (sizeof(allPath) - 4))
+        {
+            strcpy(allPath, "../");
+            strcat(allPath, imagePath);
+
+            if ((image = fopen(allPath, "rb")) == NULL)
+            {
+                strcpy(allPath, "..\\");
+                strcat(allPath, imagePath);
+
+                if ((image = fopen(allPath, "rb")) == NULL)
+                {
+                    perror("v09, image file");
+                    exit(2);
+                }
+            }
+        }
+    }
+    fread(mem+ romAddr,romSize,1,image);
+    fclose(image);
 }
 
 void usage(void)
 {
  fprintf(stderr,"Usage: v09 [-t tracefile [-tl addr] "
-                "[-th addr] ]\n[-e escchar] \n");
+                "[-th addr] ] [-rp romfile] [-ra addr ] [-rs length] [-e escchar] \n");
  exit(1); 
 }
 
@@ -75,11 +90,14 @@ void usage(void)
 
 void main(int argc,char *argv[])
 {
- Word loadaddr=0x100;
- char *imagename=0;
  int i;
+ int romAddr = 0x8000;
+ int romSize = 0x8000;
+ const char* romPath = "v09.rom";
+
  escchar='\x1d'; 
- tracelo=0;tracehi=0xffff;
+ tracelo=0;
+ tracehi=0xffff;
  for(i=1;i<argc;i++) {
     if (strcmp(argv[i],"-t")==0) {
      i++;
@@ -91,10 +109,20 @@ void main(int argc,char *argv[])
    } else if (strcmp(argv[i],"-tl")==0) {
      i++;
      tracelo=strtol(argv[i],(char**)0,0);
-   } else if (strcmp(argv[i],"-th")==0) {
-     i++;
-     tracehi=strtol(argv[i],(char**)0,0);
-   } else if (strcmp(argv[i],"-e")==0) {
+   }
+   else if (strcmp(argv[i], "-th") == 0) {
+        i++;
+        tracehi = strtol(argv[i], (char**)0, 0);
+   } else if (strcmp(argv[i], "-rp") == 0) {
+       i++;
+       romPath = argv[i];
+   } else if (strcmp(argv[i], "-ra") == 0) {
+        i++;
+        romAddr = strtol(argv[i], 0, 0);
+   } else if (strcmp(argv[i], "-rs") == 0) {
+        i++;
+        romSize = strtol(argv[i], 0, 0);
+    } else if (strcmp(argv[i],"-e")==0) {
      i++;
      escchar=strtol(argv[i],(char**)0,0);
    } else usage();
@@ -105,7 +133,7 @@ void main(int argc,char *argv[])
    exit(2);
  } 
  #endif
- read_image(); 
+ read_image(romPath, romAddr, romSize);
  set_term(escchar);
  pcreg=(mem[0xfffe]<<8)+mem[0xffff]; 
  interpr();
