@@ -31,6 +31,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#define FNLEN _MAX_PATH
+#else
+#include <limits.h>
+#define FNLEN PATH_MAX
+#endif // WIN32
+
 #define engine extern
 
 #include "v09.h"
@@ -55,7 +62,7 @@ void read_image(const char *imagePath, int romAddr, int romSize)
     FILE *image;
     if ((image = fopen(imagePath, "rb")) == NULL)
     {
-        char allPath[_MAX_PATH];
+        char allPath[FNLEN];
         if (strlen(imagePath) < (sizeof(allPath) - 4))
         {
             strcpy(allPath, "../");

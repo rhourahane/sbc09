@@ -376,12 +376,12 @@ void set_term(char c)
 	hConsole = GetStdHandle(STD_INPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE)
 	{
-		fprintd(stderr, "Failed to get windows console");
+		fprintf(stderr, "Failed to get windows console");
 		do_exit();
 	}
 	if (!GetConsoleMode(hConsole, &oldConsoleMode))
 	{
-		fprintd(stderr, "Failed to get mode of windows console");
+		fprintf(stderr, "Failed to get mode of windows console");
 		do_exit();
 	};
 

@@ -50,10 +50,17 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef _WIN32
+#define FNLEN _MAX_PATH
+#else
+#include <limits.h>
+#define FNLEN PATH_MAX
+#endif // WIN32
+
+
 #define NLABELS 2048
 #define MAXIDLEN 16
 #define MAXLISTBYTES 7
-#define FNLEN _MAX_PATH
 #define LINELEN 128
 
 
