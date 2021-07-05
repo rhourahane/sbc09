@@ -384,6 +384,12 @@ void set_term(char c)
 		fprintf(stderr, "Failed to get mode of windows console");
 		do_exit();
 	};
+	DWORD newMode = oldConsoleMode & ~ENABLE_PROCESSED_INPUT;
+	if (!SetConsoleMode(hConsole, newMode))
+	{
+		fprintf(stderr, "Failed to set mode of windows console");
+		do_exit();
+	};
 
 	SetConsoleCtrlHandler(ctrlHandler, TRUE);
 	hTimer = 0;

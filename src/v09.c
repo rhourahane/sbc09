@@ -70,18 +70,18 @@ void read_image(const char *imagePath, int romAddr, int romSize)
 
             if ((image = fopen(allPath, "rb")) == NULL)
             {
-                strcpy(allPath, "..\\");
-                strcat(allPath, imagePath);
-
-                if ((image = fopen(allPath, "rb")) == NULL)
-                {
-                    perror("v09, image file");
-                    exit(2);
-                }
+                perror("v09, image file");
+                exit(2);
             }
         }
+        else
+        {
+            perror("v09, image file");
+            exit(2);
+        }
     }
-    fread(mem+ romAddr,romSize,1,image);
+
+    fread(mem+ romAddr, romSize, 1,image);
     fclose(image);
 }
 
