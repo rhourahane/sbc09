@@ -291,73 +291,97 @@ void do_exit(void) {
 	exit(0);
 }
 
+void printIntHelp()
+{
+	printf("Log\t{L<LogFile>}\tOpen LogFile\n");
+	printf("Serial\t{S<inputFile>}\tUse file as serial input\n");
+	printf("eXit\t{X} Exit x-modem transfer or exit it no transfer happening\n");
+	printf("Up\t{U<file>} Upload a file using x-modem transfter protocol\n");
+	printf("Down\t{D<file>} Save a file using x-modem transfter protocol\n");
+	printf("Reset\t{R}\n");
+	printf("Help\t{H}\n");
+}
+
 void do_escape(void) {
+	char noAction = FALSE;
 	char s[80];
 	restore_term();
-	printf("v09>");
-	fgets(s, 80, stdin);
-	if (s[0])
-		s[strlen(s) - 1] = 0;
-	switch (toupper(s[0])) {
-	case 'L':
-		if (logfile)
-			fclose(logfile);
-		logfile = 0;
-		if (s[1]) {
-			logfile = fopen(s + 1, "w");
-		}
-		break;
-	case 'S':
-		if (infile)
-			fclose(infile);
-		infile = 0;
-		if (s[1]) {
-			infile = fopen(s + 1, "r");
-		}
-		break;
-	case 'X':
-		if (!xmstat)
-			do_exit();
-		else {
-			xmstat = 0;
-			fclose(xfile);
+	do
+	{
+		noAction = FALSE;
+		printf("v09>");
+		fgets(s, 80, stdin);
+		if (s[0])
+			s[strlen(s) - 1] = 0;
+		switch (toupper(s[0])) {
+		case 'L':
+			if (logfile)
+				fclose(logfile);
+			logfile = 0;
+			if (s[1]) {
+				logfile = fopen(s + 1, "w");
+			}
+			break;
+		case 'S':
+			if (infile)
+				fclose(infile);
+			infile = 0;
+			if (s[1]) {
+				infile = fopen(s + 1, "r");
+			}
+			break;
+		case 'X':
+			if (!xmstat)
+				do_exit();
+			else {
+				xmstat = 0;
+				fclose(xfile);
+				xfile = 0;
+				noAction = TRUE;
+			}
+			break;
+		case 'U':
+			if (xfile)
+				fclose(xfile);
 			xfile = 0;
+			if (s[1]) {
+				xfile = fopen(s + 1, "rb");
+			}
+			if (xfile)
+				xmstat = 1;
+			else
+				xmstat = 0;
+			xidx = 0;
+			acknak = 21;
+			rcvdnak = EOF;
+			blocknum = 1;
+			break;
+		case 'D':
+			if (xfile)
+				fclose(xfile);
+			xfile = 0;
+			if (s[1]) {
+				xfile = fopen(s + 1, "wb");
+			}
+			if (xfile)
+				xmstat = 2;
+			else
+				xmstat = 0;
+			xidx = 0;
+			acknak = 21;
+			blocknum = 1;
+			break;
+		case 'R':
+			pcreg = (mem[0xfffe] << 8) + mem[0xffff];
+			break;
+		case 'H':
+			printIntHelp();
+			noAction = TRUE;
+			break;
 		}
-		break;
-	case 'U':
-		if (xfile)
-			fclose(xfile);
-		xfile = 0;
-		if (s[1]) {
-			xfile = fopen(s + 1, "rb");
-		}
-		if (xfile)
-			xmstat = 1;
-		else
-			xmstat = 0;
-		xidx = 0;
-		acknak = 21;
-		rcvdnak = EOF;
-		blocknum = 1;
-		break;
-	case 'D':
-		if (xfile)
-			fclose(xfile);
-		xfile = 0;
-		if (s[1]) {
-			xfile = fopen(s + 1, "wb");
-		}
-		if (xfile)
-			xmstat = 2;
-		else
-			xmstat = 0;
-		xidx = 0;
-		acknak = 21;
-		blocknum = 1;
-		break;
-	case 'R':
-		pcreg = (mem[0xfffe] << 8) + mem[0xffff];
 	}
+	while (noAction);
+
 	if (!tracing)
 		attention = 0;
 	escape = 0;
