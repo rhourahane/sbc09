@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v09", "v09.vcxproj", "{B25D
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "a09", "a09.vcxproj", "{7ED7564A-2DF1-4461-AE06-B7B93EEE1129}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "makerom", "makerom.vcxproj", "{AFA44263-CA90-482A-987E-61B0B53960FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{7ED7564A-2DF1-4461-AE06-B7B93EEE1129}.Release|x64.Build.0 = Release|x64
 		{7ED7564A-2DF1-4461-AE06-B7B93EEE1129}.Release|x86.ActiveCfg = Release|Win32
 		{7ED7564A-2DF1-4461-AE06-B7B93EEE1129}.Release|x86.Build.0 = Release|Win32
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Debug|x64.ActiveCfg = Debug|x64
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Debug|x64.Build.0 = Debug|x64
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Debug|x86.ActiveCfg = Debug|Win32
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Debug|x86.Build.0 = Debug|Win32
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Release|x64.ActiveCfg = Release|x64
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Release|x64.Build.0 = Release|x64
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Release|x86.ActiveCfg = Release|Win32
+		{AFA44263-CA90-482A-987E-61B0B53960FB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

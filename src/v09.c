@@ -81,7 +81,19 @@ void read_image(const char *imagePath, int romAddr, int romSize)
         }
     }
 
-    fread(mem+ romAddr, romSize, 1,image);
+    if (romSize == -1)
+    {
+        fseek(image, 0, SEEK_END);
+        romSize = ftell(image);
+        fseek(image, 0, SEEK_SET);
+    }
+
+    if (romAddr == -1)
+    {
+        romAddr = 0x10000 - romSize;
+    }
+
+    fread(mem + romAddr, 1, romSize,image);
     fclose(image);
 }
 
@@ -98,8 +110,8 @@ void usage(void)
 void main(int argc,char *argv[])
 {
  int i;
- int romAddr = 0x8000;
- int romSize = 0x8000;
+ int romAddr = -1;
+ int romSize = -1;
  const char* romPath = "v09.rom";
 
  escchar='\x1d'; 
