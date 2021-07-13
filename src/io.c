@@ -303,7 +303,7 @@ void printIntHelp()
 }
 
 void do_escape(void) {
-	char noAction = FALSE;
+	char noAction = 0;
 	char s[80];
 	restore_term();
 	do
@@ -376,7 +376,7 @@ void do_escape(void) {
 			break;
 		case 'H':
 			printIntHelp();
-			noAction = TRUE;
+			noAction = 1;
 			break;
 		}
 	}
