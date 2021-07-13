@@ -308,7 +308,7 @@ void do_escape(void) {
 	restore_term();
 	do
 	{
-		noAction = FALSE;
+		noAction = 0;
 		printf("v09>");
 		fgets(s, 80, stdin);
 		if (s[0])
@@ -337,7 +337,7 @@ void do_escape(void) {
 				xmstat = 0;
 				fclose(xfile);
 				xfile = 0;
-				noAction = TRUE;
+				noAction = 1;
 			}
 			break;
 		case 'U':
